@@ -1,0 +1,33 @@
+
+super_radcan(expr) := block([algebraic:true], radcan(exponentialize(logarc(expr))))$
+lie_bracket(f, g, x) := block([], jacobian(list_matrix_entries(g), x) . f - jacobian(list_matrix_entries(f), x) . g)$
+
+/*
+ * Check if a distribuion is involutive.
+ * Method used: wolfweb.unr.edu/~fadali/EE776/FeedbackLinearization.pdf
+ */
+involutive(G, x) := block([n, Gc, R],
+    n: length(G[1]),
+
+    /* Need to canonicalize in order to get correct results from rank() */
+    printf(verbose, "Canonicalizing G~%"),
+    Gc: super_radcan(G),
+
+    printf(verbose, "Finding rank of G~%"),
+    R: rank(Gc),
+    return(catch(
+        for i: 1 thru n - 1 do
+            for j: i + 1 thru n do (
+                ip: i + 8320, jp: j + 8320,
+                printf(verbose, "Formulating [G~c, G~c]~%", ip, jp),
+                adGiGj: super_radcan(lie_bracket(col(Gc, i), col(Gc, j), x)),
+                printf(verbose, "Checking that [G~c, G~c] ϵ G~%", ip, jp),
+                if rank(addcol(Gc, adGiGj)) # R then (
+                    printf(verbose, "[G~c, G~c] ∉ G~%", ip, jp),
+                    throw(false)
+                )
+            ),
+        printf(verbose, "∀f∀g: f ϵ G ⋏ g ϵ G ⇒ [f, g] ϵ G~%"),
+        throw(true)
+    ))
+)$
