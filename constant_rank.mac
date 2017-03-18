@@ -1,0 +1,41 @@
+constant_rank(G) := block(
+	[
+		i: 1,
+		n: length(G[1]),
+		R, Gc, G_tmp
+	],
+	Gc: super_radcan(G),
+	R: rank(Gc),
+
+	/* Get rid of linearly dependent columns */
+	while R # n do (
+		G_tmp: submatrix(Gc, i),
+		if rank(G_tmp) = R then (
+			Gc: copymatrix(G_tmp),
+			n: n - 1
+		) else (
+			i: i + 1
+		)
+	),
+
+	/*
+	* Solve c₁ G₁ + ... + cₙ Gₙ = 0
+	* The only acceptable solution is c₁ = ... = cₙ = 0
+	*/
+	C: genmatrix(c, n, 1),
+	eq: list_matrix_entries(Gc . C),
+	sol: solve(eq, listofvars(eq)),
+
+	/* Check if there are more than one solutions */
+	if length(sol) # 1 then
+		return(false),
+
+	/* Confirm the soution contains c₁ = ... = cₙ = 0 */
+	C_eq_zero: makelist(f = 0, f, list_matrix_entries(C)),
+	return(catch(
+		for i: 1 thru n do
+			if not member(C_eq_zero[i], sol[1]) then
+			throw(false),
+		throw(R)
+	))
+)$
