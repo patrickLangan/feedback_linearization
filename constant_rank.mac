@@ -1,41 +1,46 @@
-constant_rank(G) := block(
+/*
+ * Check if the rank of a matrix M(x) is constant for all x.
+ *
+ * This function is intended to be used to check if a distribution has constant
+ * rank.  From a distribution span{f₁(x), ..., fₙ(x)} create a matrix whose
+ * columns are fᵢ, 1 ≤ i ≤ n.
+ *
+ * Method:
+ * 1. Remove columns of M(x) which are linearly dependent for all x.
+ *    Note that the resultant matrix M'(x) will likely have some remaining
+ *    columns which are linearly dependent for some specific x points.
+ * 2. Show that the only solution to c₁M'.₁(x) + ... + cₙM'.ₙ(x) = 0 is
+ *    c₁ = ... = cₙ = 0.  This proves that the matrix columns are linearly
+ *    independent for all x, thus M'(x) is constant full rank and M(x) has a
+ *    constant rank equal to rank(M'(x)).
+ */
+constant_rank(M) := block(
 	[
 		i: 1,
-		n: length(G[1]),
-		R, Gc, G_tmp
+		n: length(M[1]),
+		R, Mc, M_tmp
 	],
-	Gc: super_radcan(G),
-	R: rank(Gc),
+	Mc: super_radcan(M),
+	R: rank(Mc),
 
-	/* Get rid of linearly dependent columns */
 	while R # n do (
-		G_tmp: submatrix(Gc, i),
-		if rank(G_tmp) = R then (
-			Gc: copymatrix(G_tmp),
+		M_tmp: submatrix(Mc, i),
+		if rank(M_tmp) = R then (
+			Mc: copymatrix(M_tmp),
 			n: n - 1
 		) else (
 			i: i + 1
 		)
 	),
 
-	/*
-	* Solve c₁ G₁ + ... + cₙ Gₙ = 0
-	* The only acceptable solution is c₁ = ... = cₙ = 0
-	*/
 	C: genmatrix(c, n, 1),
-	eq: list_matrix_entries(Gc . C),
+	eq: list_matrix_entries(Mc . C),
 	sol: solve(eq, listofvars(eq)),
 
-	/* Check if there are more than one solutions */
+	/* Note that c₁ = ... = cₙ = 0 is guaranteed to be one of the solutions */
 	if length(sol) # 1 then
 		return(false),
 
-	/* Confirm the soution contains c₁ = ... = cₙ = 0 */
-	C_eq_zero: makelist(f = 0, f, list_matrix_entries(C)),
-	return(catch(
-		for i: 1 thru n do
-			if not member(C_eq_zero[i], sol[1]) then
-			throw(false),
-		throw(R)
-	))
+	return(R)
 )$
+
