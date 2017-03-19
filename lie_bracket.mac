@@ -1,0 +1,9 @@
+/*
+ * Compute the lie bracket of two vector fields.
+ */
+lie_bracket(f, g, x) := block(
+	[],
+	jacobian(list_matrix_entries(g), x) . f
+		- jacobian(list_matrix_entries(f), x) . g
+)$
+
