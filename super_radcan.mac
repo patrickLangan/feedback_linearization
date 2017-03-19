@@ -1,0 +1,12 @@
+/*
+ * Canonicalize an expression.
+ *
+ * rank(expr), solve(expr), and other maxima functions will not always give
+ * expected results unless expr has first been canonicalized.
+ *
+ * Source: https://sourceforge.net/p/maxima/mailman/message/35647584/
+ * Disclaimer: http://maxima.sourceforge.net/docs/manual/maxima_9.html#radcan
+ */
+super_radcan(expr) := block([algebraic:true],
+	radcan(exponentialize(logarc(expr))))$
+
