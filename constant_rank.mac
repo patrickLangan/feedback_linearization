@@ -7,8 +7,8 @@
  *
  * Method:
  * 1. Remove columns of M(x) which are linearly dependent for all x.
- *    Note that the resultant matrix M'(x) will likely have some remaining
- *    columns which are linearly dependent for some specific x points.
+ *    Note that it is possible for columns of the resultant matrix M'(x) to be
+ *    linearly dependent for some specific x points.
  * 2. Show that the only solution to c₁M'.₁(x) + ... + cₙM'.ₙ(x) = 0 is
  *    c₁ = ... = cₙ = 0.  This proves that the matrix columns are linearly
  *    independent for all x, thus M'(x) is constant full rank and M(x) has a
@@ -18,8 +18,11 @@ constant_rank(M) := block(
 	[
 		i: 1,
 		n: length(M[1]),
-		R, Mc, M_tmp
+		n0, R, Mc, M_tmp
 	],
+	n0: n,
+
+	printf(verbose, "Canonicalizing M(x)~%"),
 	Mc: super_radcan(M),
 	R: rank(Mc),
 
@@ -27,20 +30,30 @@ constant_rank(M) := block(
 		M_tmp: submatrix(Mc, i),
 		if rank(M_tmp) = R then (
 			Mc: copymatrix(M_tmp),
-			n: n - 1
+			n: n - 1,
+			printf(verbose, "Removed linearly dependent column, "),
+			printf(verbose, "#~d out of ~d~%", n0 - n, n0 - R)
 		) else (
 			i: i + 1
 		)
 	),
 
+	printf(verbose, "Solving c₁M'.₁(x) + ... + cₙM'.ₙ(x) = 0~%"),
 	C: genmatrix(c, n, 1),
 	eq: list_matrix_entries(Mc . C),
 	sol: solve(eq, listofvars(eq)),
 
 	/* Note that c₁ = ... = cₙ = 0 is guaranteed to be one of the solutions */
-	if length(sol) # 1 then
-		return(false),
+	if length(sol) # 1 then (
+		if verbose then (
+			printf(verbose, "More than one solution, M(x) is not constant rank~%"),
+			printf(verbose, "Solutions are: ~%"),
+			print(sol)
+		),
+		return(false)
+	),
 
+	printf(verbose, "Solution is c₁ = ... = cₙ = 0, M(x) is constant rank~%"),
 	return(R)
 )$
 
