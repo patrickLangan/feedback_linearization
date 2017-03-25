@@ -19,7 +19,7 @@ involutive(G, x) := block(
 	return(catch(
 	for i: 1 thru n - 1 do
 		for j: i + 1 thru n do (
-			ip: i + 8320, jp: j + 8320,
+			ip: unicode(i + 8320), jp: unicode(j + 8320),
 			printf(verbose, "Formulating [G~c, G~c]~%", ip, jp),
 			adGiGj: super_radcan(lie_bracket(col(Gc, i), col(Gc, j), x)),
 			printf(verbose, "Checking that [G~c, G~c] ϵ G~%", ip, jp),
