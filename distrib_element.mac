@@ -1,0 +1,13 @@
+load("super_radcan");
+
+/*
+ * Check if vector field f is an element of distribution G
+ */
+distrib_element(f, G) := block(
+	[fc, Gc],
+	Gc: super_radcan(G),
+	if rank(Gc) = rank(addcol(Gc, super_radcan(f))) then
+		return(true),
+	return(false)
+)$
+
