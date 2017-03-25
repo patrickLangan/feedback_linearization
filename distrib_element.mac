@@ -5,8 +5,15 @@ load("super_radcan");
  */
 distrib_element(f, G) := block(
 	[fc, Gc],
+
+	printf(verbose, "Canonicalizing f~%"),
+	fc: super_radcan(f),
+
+	printf(verbose, "Canonicalizing G~%"),
 	Gc: super_radcan(G),
-	if rank(Gc) = rank(addcol(Gc, super_radcan(f))) then
+
+	printf(verbose, "Checking if f ϵ G~%"),
+	if rank(Gc) = rank(addcol(Gc, fc)) then
 		return(true),
 	return(false)
 )$
